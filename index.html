@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code with Logo</title>
+    <script src="https://github.com/quangnguyen1986/qrcode/blob/main/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        canvas {
+            display: block;
+            margin: 20px auto;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+        }
+        .color-picker {
+            display: inline-block;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tạo QR Code với Logo</h1>
+
+    <!-- Form nhập liệu -->
+    <label for="url-input">Nhập URL:</label>
+    <input type="text" id="url-input" placeholder="Ví dụ: https://example.com" />
+
+    <label for="logo-input">Nhập đường dẫn ảnh logo:</label>
+    <input type="text" id="logo-input" placeholder="Ví dụ: logo.png" />
+
+    <label for="qr-width-input">Nhập kích thước QR code (width):</label>
+    <input type="number" id="qr-width-input" placeholder="Ví dụ: 200" />
+
+    <label for="logo-size-input">Nhập kích thước logo:</label>
+    <input type="number" id="logo-size-input" placeholder="Ví dụ: 40" />
+
+    <label for="color-picker">Chọn màu QR code:</label>
+    <input type="color" id="color-picker" value="#000000" class="color-picker" />
+
+    <button onclick="generateQRCode()">Tạo QR Code</button>
+
+    <!-- Canvas để hiển thị QR code -->
+    <canvas id="qr-code"></canvas>
+
+    <script>
+        // Hàm tạo QR code với logo
+        async function generateQRCode() {
+            // Lấy giá trị từ người dùng
+            const url = document.getElementById('url-input').value;
+            const logoUrl = document.getElementById('logo-input').value;
+            const qrWidth = parseInt(document.getElementById('qr-width-input').value);
+            const logoSize = parseInt(document.getElementById('logo-size-input').value);
+            const qrColor = document.getElementById('color-picker').value;
+
+            // Kiểm tra dữ liệu nhập
+            if (!url || !logoUrl || !qrWidth || !logoSize) {
+                alert("Vui lòng nhập đầy đủ thông tin!");
+                return;
+            }
+
+            const canvas = document.getElementById('qr-code');
+            const ctx = canvas.getContext('2d');
+
+            // Đặt kích thước canvas dựa trên kích thước QR code
+            canvas.width = qrWidth;
+            canvas.height = qrWidth;
+
+            // Xóa canvas cũ (nếu có)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Tạo QR code
+            QRCode.toCanvas(canvas, url, {
+                width: qrWidth,
+                margin: 2,
+                color: {
+                    dark: qrColor, // Màu của QR code (lấy từ color picker)
+                    light: '#ffffff' // Màu nền (trắng)
+                }
+            }, function (error) {
+                if (error) {
+                    console.error('Lỗi khi tạo QR code:', error);
+                    return;
+                }
+
+                // Tải logo và vẽ lên QR code
+                const logo = new Image();
+                logo.src = logoUrl;
+                logo.onload = () => {
+                    const x = (canvas.width - logoSize) / 2;
+                    const y = (canvas.height - logoSize) / 2;
+
+                    // Xóa một phần QR code ở vị trí logo
+                    ctx.clearRect(x, y, logoSize, logoSize);
+
+                    // Vẽ logo lên giữa QR code
+                    ctx.drawImage(logo, x, y, logoSize, logoSize);
+                };
+            });
+        }
+
+    </script>
+</body>
+</html>
